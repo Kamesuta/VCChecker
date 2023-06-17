@@ -1,0 +1,6 @@
+# DiscordのBotトークン
+token: <TOKEN>
+# DiscordのサーバーID
+guild_id: <GUILD_ID>
+# DiscordSRVのアカウント連携jsonのURL
+linked_accounts_url: <LINKED_ACCOUNTS_URL>

@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,6 +17,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 public final class VCChecker extends JavaPlugin implements Listener, EventListener {
@@ -162,13 +165,20 @@ public final class VCChecker extends JavaPlugin implements Listener, EventListen
         }
 
         // プレイヤーがVCに入っているかチェック
-        if (voiceState.inAudioChannel()) {
-            // VCに入っているので何もしない
+        if (!voiceState.inAudioChannel()) {
+            // VCに入っていないのでマイクラからキック
+            player.kickPlayer(ChatColor.RED + "連携したDiscordアカウントでVCに接続してください。");
             return;
         }
 
-        // VCに入っていないのでマイクラからキック
-        player.kickPlayer(ChatColor.RED + "連携したDiscordアカウントでVCに接続してください。");
+        // サブアカウントが参加していたらキック
+        List<UUID> playerIds = linkedAccounts.linkedAccounts.get(discordUid);
+        playerIds.stream().filter(id -> !id.equals(player.getUniqueId())).forEach(id -> {
+            Player p = Bukkit.getPlayer(id);
+            if (p != null) {
+                p.kickPlayer(ChatColor.RED + "別のアカウントがマイクラに参加したためキックされました。");
+            }
+        });
     }
 
     // VCから抜けたらマイクラからキック
